@@ -1,2 +1,19 @@
-# energy-ai-assistant
-AI-powered energy operation and maintenance assistant.
+# AI Energy O&M Assistant
+
+AI 能源运维助手。
+
+## 项目目标
+
+通过 AI + 企业运维知识库，帮助能源运维人员快速查询设备资料、故障处理方法和历史运维经验。
+
+## MVP 核心功能
+
+- 运维文档上传
+- 文档解析
+- 知识库检索
+- AI 问答
+- 问答历史记录
+
+## 当前阶段
+
+项目初始化与 MVP 开发。
