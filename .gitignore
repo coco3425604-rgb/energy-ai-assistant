@@ -49,6 +49,7 @@ coverage.xml
 *.py.cover
 .hypothesis/
 .pytest_cache/
+/.pytest_tmp/
 cover/
 
 # Translations
@@ -205,6 +206,10 @@ tempCodeRunnerFile.py
 
 # Ruff stuff:
 .ruff_cache/
+
+# Uploaded documents (keep the directory itself in Git)
+backend/uploads/*
+!backend/uploads/.gitkeep
 
 # PyPI configuration file
 .pypirc
