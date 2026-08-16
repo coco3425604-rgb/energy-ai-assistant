@@ -9,6 +9,12 @@ from backend.app.services.document_upload import (
     InvalidPdfError,
     save_pdf,
 )
+from backend.app.services.pdf_text_extraction import (
+    DocumentNotFoundError,
+    InvalidDocumentFilenameError,
+    PdfExtractionError,
+    extract_pdf_text,
+)
 
 UPLOAD_DIR = Path(__file__).resolve().parents[1] / "uploads"
 
@@ -19,6 +25,19 @@ class UploadResult(BaseModel):
     success: bool
     message: str
     filename: str
+
+
+class ExtractedPageResult(BaseModel):
+    page_number: int
+    text: str
+
+
+class ExtractionResult(BaseModel):
+    success: bool
+    message: str
+    filename: str
+    page_count: int
+    pages: list[ExtractedPageResult]
 
 
 @app.post(
@@ -47,4 +66,36 @@ async def upload_document(file: UploadFile | None = File(default=None)) -> Uploa
         success=True,
         message="PDF uploaded successfully",
         filename=filename,
+    )
+
+
+@app.post(
+    "/api/documents/{filename}/extract",
+    response_model=ExtractionResult,
+    status_code=status.HTTP_200_OK,
+)
+def extract_document(filename: str) -> ExtractionResult:
+    try:
+        result = extract_pdf_text(filename, UPLOAD_DIR)
+    except InvalidDocumentFilenameError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except DocumentNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PdfExtractionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    message = (
+        "PDF text extracted successfully"
+        if result.has_extractable_text
+        else "The PDF contains no extractable text layer"
+    )
+    return ExtractionResult(
+        success=True,
+        message=message,
+        filename=result.filename,
+        page_count=result.page_count,
+        pages=[
+            ExtractedPageResult(page_number=page.page_number, text=page.text)
+            for page in result.pages
+        ],
     )
